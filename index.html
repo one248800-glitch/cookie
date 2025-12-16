@@ -1,0 +1,490 @@
+import React, { useState, useEffect } from 'react';
+import { RefreshCw, X, Quote, Heart, Users, Lightbulb, CheckCircle, Sparkles } from 'lucide-react';
+
+// 포춘쿠키 SVG 컴포넌트
+const FortuneCookieIcon = ({ className }) => (
+  <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M90 55C90 75 75 85 50 85C25 85 10 75 10 55C10 35 30 15 50 15C70 15 90 35 90 55Z" fill="#FCD34D" />
+    <path d="M10 55C10 55 25 65 50 65C75 65 90 55 90 55" stroke="#D97706" strokeWidth="3" strokeLinecap="round" />
+    <path d="M15 55C15 40 30 25 50 25C70 25 85 40 85 55" stroke="#F59E0B" strokeWidth="2" strokeDasharray="4 4" opacity="0.6" />
+    <path d="M85 55L75 45" stroke="#D97706" strokeWidth="3" strokeLinecap="round" />
+    <path d="M15 55L25 45" stroke="#D97706" strokeWidth="3" strokeLinecap="round" />
+  </svg>
+);
+
+// 폭죽 효과 컴포넌트
+const Confetti = () => {
+  return (
+    <div className="fixed inset-0 pointer-events-none z-[60] overflow-hidden">
+      {[...Array(50)].map((_, i) => {
+        const style = {
+          left: `${Math.random() * 100}%`,
+          top: `-20px`,
+          animationDuration: `${Math.random() * 2 + 1}s`,
+          animationDelay: `${Math.random() * 0.5}s`,
+          backgroundColor: ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'][Math.floor(Math.random() * 5)],
+          transform: `rotate(${Math.random() * 360}deg)`,
+        };
+        return (
+          <div
+            key={i}
+            className="absolute w-3 h-3 rounded-sm animate-confetti-fall"
+            style={style}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
+const LeadershipFortuneCookie = () => {
+  const [selectedValues, setSelectedValues] = useState([]);
+  const [showResult, setShowResult] = useState(false);
+  const [isOpening, setIsOpening] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  // 데이터 매핑: 가치 단어와 명언 연결
+  const quotesData = [
+    {
+      id: 1,
+      value: "영향력",
+      category: "리더십의 본질",
+      en: "Leadership is influence.",
+      ko: "리더십은 직위가 아니라 영향력이다.",
+      author: "John C. Maxwell"
+    },
+    {
+      id: 2,
+      value: "성장",
+      category: "리더의 역할",
+      en: "The function of leadership is to produce more leaders, not more followers.",
+      ko: "리더십의 역할은 추종자를 만드는 것이 아니라 또 다른 리더를 만드는 것이다.",
+      author: "Ralph Nader"
+    },
+    {
+      id: 3,
+      value: "돌봄",
+      category: "섬김의 리더십",
+      en: "Leadership is not about being in charge. It is about taking care of those in your charge.",
+      ko: "리더십은 지배가 아니라 돌봄이다.",
+      author: "Simon Sinek"
+    },
+    {
+      id: 4,
+      value: "도덕성",
+      category: "교육 리더십",
+      en: "Schools are moral enterprises.",
+      ko: "학교는 도덕적 공동체이다.",
+      author: "Robert Sergiovanni"
+    },
+    {
+      id: 5,
+      value: "배움",
+      category: "교육의 목적",
+      en: "The purpose of educational leadership is to improve learning for all students.",
+      ko: "교육 리더십의 목적은 모든 학생의 배움을 향상시키는 것이다.",
+      author: "Philip Hallinger"
+    },
+    {
+      id: 6,
+      value: "진심",
+      category: "마음가짐",
+      en: "You cannot mandate what matters.",
+      ko: "중요한 것은 명령으로 만들 수 없다.",
+      author: "Michael Fullan"
+    },
+    {
+      id: 7,
+      value: "변화",
+      category: "변화 주도",
+      en: "Change is a journey, not a blueprint.",
+      ko: "변화는 설계도가 아니라 여정이다.",
+      author: "Michael Fullan"
+    },
+    {
+      id: 8,
+      value: "비전",
+      category: "미래 지향",
+      en: "Leadership is the capacity to translate vision into reality.",
+      ko: "리더십은 비전을 현실로 만드는 능력이다.",
+      author: "Warren Bennis"
+    },
+    {
+      id: 9,
+      value: "협력",
+      category: "공동체",
+      en: "If you want to go fast, go alone. If you want to go far, go together.",
+      ko: "빨리 가려면 혼자 가고, 멀리 가려면 함께 가라.",
+      author: "아프리카 속담"
+    },
+    {
+      id: 10,
+      value: "공감",
+      category: "관계 맺기",
+      en: "People don’t care how much you know until they know how much you care.",
+      ko: "사람들은 당신이 얼마나 아는지보다, 얼마나 배려하는지를 먼저 본다.",
+      author: "Theodore Roosevelt"
+    },
+    {
+      id: 11,
+      value: "행동",
+      category: "실천",
+      en: "Leadership is practiced not so much in words as in attitude and in actions.",
+      ko: "리더십은 말보다 태도와 행동에서 드러난다.",
+      author: "Harold Geneen"
+    },
+    {
+      id: 12,
+      value: "신뢰",
+      category: "관계의 핵심",
+      en: "Trust is the glue of life. It’s the most essential ingredient in effective leadership.",
+      ko: "신뢰는 리더십의 핵심이다.",
+      author: "Stephen Covey"
+    },
+    {
+      id: 13,
+      value: "희망",
+      category: "교사의 힘",
+      en: "A good teacher inspires hope, ignites the imagination, and instills a love of learning.",
+      ko: "좋은 교사는 희망을 주고, 상상력을 깨우며, 배움에 대한 사랑을 심어준다.",
+      author: "Brad Henry"
+    },
+    {
+      id: 14,
+      value: "소명",
+      category: "교직관",
+      en: "Teaching is not a profession; it is a calling.",
+      ko: "교직은 직업이 아니라 소명이다.",
+      author: "Unknown"
+    },
+    {
+      id: 15,
+      value: "영감",
+      category: "영향력",
+      en: "Every teacher is a leader because every teacher influences lives.",
+      ko: "모든 교사는 리더다. 왜냐하면 모든 교사는 삶에 영향을 미치기 때문이.",
+      author: "Unknown"
+    },
+    {
+      id: 16,
+      value: "용기",
+      category: "실천",
+      en: "Leadership begins with the courage to care.",
+      ko: "리더십은 돌보려는 용기에서 시작된다.",
+      author: "Unknown"
+    },
+    {
+      id: 17,
+      value: "작은 실천",
+      category: "변화의 시작",
+      en: "Small acts, when multiplied by many teachers, can change a school.",
+      ko: "작은 실천이 교사들에 의해 쌓이면 학교를 바꾼다.",
+      author: "Unknown"
+    },
+    {
+      id: 18,
+      value: "문화",
+      category: "조직 문화",
+      en: "The best leaders create a culture where everyone feels responsible.",
+      ko: "최고의 리더는 모두가 책임을 느끼는 문화를 만든다.",
+      author: "Unknown"
+    }
+  ];
+
+  // 값 선택 핸들러
+  const handleValueSelect = (value) => {
+    if (selectedValues.includes(value)) {
+      setSelectedValues(selectedValues.filter(v => v !== value));
+    } else {
+      if (selectedValues.length < 3) {
+        setSelectedValues([...selectedValues, value]);
+      }
+    }
+  };
+
+  // 포춘쿠키 열기 핸들러
+  const handleOpenCookie = () => {
+    setIsOpening(true);
+    setTimeout(() => {
+      setShowResult(true);
+      setShowConfetti(true);
+      setIsOpening(false);
+      // 폭죽 3초 후 제거
+      setTimeout(() => setShowConfetti(false), 3500);
+    }, 1500);
+  };
+
+  // 초기화 핸들러
+  const handleReset = () => {
+    setSelectedValues([]);
+    setShowResult(false);
+    setIsOpening(false);
+    setShowConfetti(false);
+  };
+
+  // 선택된 명언 필터링
+  const selectedQuotes = quotesData.filter(q => selectedValues.includes(q.value));
+
+  return (
+    <div className="min-h-screen bg-amber-50 font-sans text-slate-800 p-4 md:p-8 flex flex-col items-center justify-center relative overflow-hidden">
+      {/* 폭죽 효과 */}
+      {showConfetti && <Confetti />}
+
+      {/* 배경 장식 */}
+      <div className="absolute top-0 left-0 w-64 h-64 bg-yellow-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+      <div className="absolute top-0 right-0 w-64 h-64 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+      <div className="absolute -bottom-8 left-20 w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+
+      {/* 메인 컨테이너 */}
+      <div className="w-full max-w-5xl z-10">
+        
+        {/* 헤더 */}
+        <header className="text-center mb-10">
+          <div className="inline-flex items-center justify-center p-3 bg-white rounded-full shadow-md mb-4">
+            <Quote className="w-6 h-6 text-indigo-600 mr-2" />
+            <span className="font-bold text-indigo-600 tracking-wide">TEACHER LEADERSHIP</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight leading-tight">
+            교사 리더십 포춘쿠키
+          </h1>
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            선생님이 중요하게 생각하는 <span className="font-bold text-indigo-600">리더십 가치 3가지</span>를 선택해보세요.<br/>
+            선생님을 위한 지혜의 명언을 선물해 드립니다.
+          </p>
+        </header>
+
+        {/* 가치 단어 그리드 */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/50 mb-8 transition-all duration-500">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+            {quotesData.map((item) => {
+              const isSelected = selectedValues.includes(item.value);
+              const isDisabled = !isSelected && selectedValues.length >= 3;
+              
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleValueSelect(item.value)}
+                  disabled={isDisabled}
+                  className={`
+                    relative group p-4 rounded-xl text-lg font-bold transition-all duration-300 transform
+                    flex flex-col items-center justify-center h-24
+                    ${isSelected 
+                      ? 'bg-indigo-600 text-white shadow-lg scale-105 ring-4 ring-indigo-200' 
+                      : 'bg-white text-slate-600 hover:bg-indigo-50 hover:shadow-md border-2 border-slate-100'}
+                    ${isDisabled ? 'opacity-40 cursor-not-allowed grayscale' : 'cursor-pointer'}
+                  `}
+                >
+                  {isSelected && (
+                    <div className="absolute top-2 right-2">
+                      <CheckCircle className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                  <span>{item.value}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 액션 버튼 영역 */}
+        <div className="flex flex-col items-center justify-center space-y-6">
+          <div className="h-8 text-indigo-600 font-semibold text-lg animate-pulse">
+            {selectedValues.length === 3 
+              ? "✨ 준비되었습니다! 쿠키를 열어보세요 ✨" 
+              : `${selectedValues.length}/3 가치를 선택해주세요`}
+          </div>
+          
+          <button
+            onClick={handleOpenCookie}
+            disabled={selectedValues.length !== 3 || isOpening}
+            className={`
+              relative overflow-hidden group w-64 h-64 rounded-full flex flex-col items-center justify-center shadow-2xl transition-all duration-500
+              ${selectedValues.length === 3 
+                ? 'bg-gradient-to-br from-indigo-50 to-amber-50 border-8 border-indigo-200 hover:scale-105 hover:shadow-indigo-500/30' 
+                : 'bg-slate-100 border-8 border-slate-200 cursor-not-allowed opacity-70'}
+              ${isOpening ? 'animate-wiggle' : ''}
+            `}
+          >
+             {/* 쿠키 아이콘 */}
+             <div className="relative">
+                <FortuneCookieIcon className={`w-32 h-32 drop-shadow-lg transition-all duration-500 ${isOpening ? 'scale-110' : 'group-hover:rotate-6'}`} />
+                {selectedValues.length === 3 && !isOpening && (
+                   <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+                     Open Me!
+                   </div>
+                )}
+             </div>
+
+             <span className={`mt-4 font-bold text-lg ${selectedValues.length === 3 ? 'text-indigo-700' : 'text-slate-400'}`}>
+                {isOpening ? "쿠키 여는 중..." : "포춘쿠키 열기"}
+             </span>
+             
+             {/* 버튼 배경 효과 */}
+             {selectedValues.length === 3 && (
+               <div className="absolute inset-0 rounded-full bg-yellow-400/10 scale-0 group-hover:scale-150 transition-transform duration-700 rounded-full"></div>
+             )}
+          </button>
+        </div>
+
+        {/* 하단 새로고침 영역 */}
+        <div className="mt-16 text-center">
+          <button 
+            onClick={handleReset}
+            className="inline-flex items-center text-slate-500 hover:text-indigo-600 transition-colors gap-2 px-4 py-2 rounded-lg hover:bg-slate-100"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>새로 시작하기</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 팝업 모달 (결과 화면) */}
+      {showResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={handleReset}></div>
+          
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-6xl z-10 overflow-hidden relative animate-pop-in">
+            {/* 모달 헤더 */}
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 flex justify-between items-center relative overflow-hidden">
+               {/* 헤더 배경 장식 */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-xl"></div>
+              
+              <div className="flex items-center gap-3 text-white z-10">
+                <FortuneCookieIcon className="w-10 h-10 drop-shadow-md text-yellow-300" />
+                <div>
+                  <h2 className="text-2xl font-bold flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-yellow-300 animate-spin-slow" />
+                    선생님의 리더십 포춘쿠키
+                  </h2>
+                </div>
+              </div>
+              <button 
+                onClick={handleReset}
+                className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-full transition-colors z-10"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* 모달 컨텐츠 (카드 3장) */}
+            <div className="p-8 bg-slate-50 overflow-y-auto max-h-[80vh]">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {selectedQuotes.map((quote, idx) => (
+                  <div 
+                    key={idx} 
+                    className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 flex flex-col hover:shadow-xl transition-shadow duration-300 relative group transform hover:-translate-y-1"
+                    style={{ animation: `fadeInUp 0.6s ease-out ${idx * 0.2}s forwards`, opacity: 0 }}
+                  >
+                    {/* 상단 장식 띠 */}
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-t-2xl"></div>
+                    
+                    {/* 아이콘 및 키워드 */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="px-3 py-1 bg-indigo-50 text-indigo-700 text-sm font-bold rounded-full uppercase tracking-wider">
+                        {quote.value}
+                      </div>
+                      {idx === 0 && <Lightbulb className="w-6 h-6 text-yellow-400" />}
+                      {idx === 1 && <Heart className="w-6 h-6 text-pink-400" />}
+                      {idx === 2 && <Users className="w-6 h-6 text-blue-400" />}
+                    </div>
+
+                    {/* 영문 명언 */}
+                    <div className="mb-4">
+                      <p className="text-lg text-slate-600 italic font-serif leading-relaxed">
+                        "{quote.en}"
+                      </p>
+                    </div>
+
+                    {/* 국문 명언 (강조) */}
+                    <div className="flex-grow mb-6">
+                      <p className="text-xl md:text-2xl font-bold text-slate-800 leading-snug break-keep">
+                        "{quote.ko}"
+                      </p>
+                    </div>
+
+                    {/* 저자 */}
+                    <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-end">
+                      <span className="text-sm font-medium text-slate-500 flex items-center gap-2">
+                        <span className="w-8 h-[1px] bg-slate-300"></span>
+                        {quote.author}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 하단 메시지 */}
+              <div className="mt-8 text-center text-slate-500 text-sm">
+                선생님의 2024년이 이 가치들로 더욱 빛나기를 응원합니다! 🌟
+              </div>
+            </div>
+            
+            {/* 모달 하단 버튼 */}
+            <div className="p-4 bg-white border-t border-slate-100 flex justify-center">
+              <button 
+                onClick={handleReset}
+                className="bg-slate-800 text-white px-8 py-3 rounded-xl font-bold hover:bg-slate-700 transition-colors flex items-center gap-2 shadow-lg"
+              >
+                <RefreshCw className="w-5 h-5" />
+                다시 선택하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+        
+        @keyframes wiggle {
+          0%, 100% { transform: rotate(-3deg); }
+          50% { transform: rotate(3deg); }
+        }
+        .animate-wiggle {
+          animation: wiggle 0.2s ease-in-out infinite;
+        }
+
+        @keyframes confetti-fall {
+          0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        .animate-confetti-fall {
+          animation-name: confetti-fall;
+          animation-timing-function: linear;
+          animation-fill-mode: forwards;
+        }
+
+        @keyframes pop-in {
+          0% { opacity: 0; transform: scale(0.5); }
+          70% { transform: scale(1.05); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-pop-in {
+          animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translate3d(0, 40px, 0); }
+          to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default LeadershipFortuneCookie;
